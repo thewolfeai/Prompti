@@ -22,6 +22,11 @@ Prompti is a menubar app that transforms rough prompts into clear, effective one
 
 ## Installation
 
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [Git](https://git-scm.com/)
+
 ### macOS & Windows
 
 Run this in your terminal:
