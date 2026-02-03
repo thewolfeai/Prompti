@@ -37,7 +37,14 @@ cd Prompti
 npm install && npm start
 ```
 
-That's it! Prompti will launch and appear in your menubar.
+Prompti will launch and appear in your menubar.
+
+**To run in the background** (so you can close the terminal):
+
+```bash
+cd ~/Prompti
+nohup npm start > /dev/null 2>&1 &
+```
 
 ## First Launch
 
