@@ -37,7 +37,7 @@ cd Prompti
 npm install && npm start
 ```
 
-Prompti will launch and appear in your menubar.
+Prompti will launch. Look in the **top-right corner** of your screen (menubar) for an **asterisk ✱ icon** — click it to open Prompti.
 
 **To run in the background** (so you can close the terminal):
 
