@@ -4,8 +4,6 @@
 
 Prompti is a menubar app that transforms rough prompts into clear, effective ones. Click the icon or press `Cmd+Shift+Space` from any app, paste your prompt, and get an enhanced version instantly.
 
-![Prompti Demo](assets/demo.gif)
-
 ## Features
 
 - **Menubar/Tray App** — Always accessible, lives in your menubar
@@ -16,9 +14,13 @@ Prompti is a menubar app that transforms rough prompts into clear, effective one
   - Google (Gemini 2.0, 1.5 Pro, 1.5 Flash)
   - Groq (Llama 3.3, Mixtral, Gemma)
   - Ollama (Local models - no API key needed!)
+- **Glassmorphism UI** — Beautiful frosted glass design
+- **Dark/Light Theme** — Toggle between themes in settings
+- **Custom Prompts** — Choose from presets (Default, Formal, Creative, Technical) or create your own
+- **Auto-Start** — Optionally launch Prompti on login
+- **Draggable Window** — Position the window anywhere, and it remembers
 - **Secure** — API keys stored in macOS Keychain / Windows Credential Manager
 - **Auto-Copy** — Enhanced prompt is automatically copied to clipboard
-- **Dark Theme** — Clean, modern Arc-style UI
 
 ## Installation
 
@@ -44,6 +46,22 @@ Prompti will launch. Look in the **top-right corner** of your screen (menubar) f
 ```bash
 cd ~/Prompti && (npm start &) && disown
 ```
+
+## Updating
+
+To update Prompti to the latest version:
+
+```bash
+cd ~/Prompti && git pull && npm install && npm start
+```
+
+Or to update and run in the background:
+
+```bash
+cd ~/Prompti && git pull && npm install && (npm start &) && disown
+```
+
+Your settings and API keys will be preserved across updates.
 
 ## First Launch
 
