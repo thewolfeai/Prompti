@@ -47,6 +47,16 @@ Prompti will launch. Look in the **top-right corner** of your screen (menubar) f
 cd ~/Prompti && (npm start &) && disown
 ```
 
+### If You Accidentally Close Prompti
+
+Run this command to restart it:
+
+```bash
+pkill -f Electron; pkill -f Prompti; cd ~/Desktop/Prompti && git pull && npm install && (npm start &) && disown
+```
+
+**Pro tip:** Go to Settings (gear icon) and enable **"Start Prompti on login"** so it automatically runs whenever you restart your Mac!
+
 ## Updating
 
 To update Prompti to the latest version:
