@@ -632,12 +632,11 @@ function showMainView() {
   elements.mainView.classList.remove('hidden');
   updateMainView();
 
-  // Start placeholder animation if input is empty (will stop on focus)
+  // Start placeholder animation if input is empty
+  // Don't auto-focus so animation can play - user clicks to type
   if (!elements.promptInput.value) {
     startPlaceholderAnimation();
   }
-
-  elements.promptInput.focus();
 }
 
 function updateMainView() {
