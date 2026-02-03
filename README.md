@@ -141,4 +141,4 @@ Contributions welcome! Please open an issue or PR.
 
 ---
 
-Made with AI assistance by [Drake Wolfe](https://github.com/thewolfeai)
+Created by [Drake Wolfe](https://github.com/thewolfeai)
