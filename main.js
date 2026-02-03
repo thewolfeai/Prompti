@@ -28,13 +28,17 @@ function createWindow() {
   const savedConfig = loadWindowConfig();
 
   mainWindow = new BrowserWindow({
-    width: 400,
-    height: 500,
+    width: 380,
+    height: 280,
+    minWidth: 320,
+    minHeight: 250,
+    maxWidth: 600,
+    maxHeight: 800,
     x: savedConfig?.x,
     y: savedConfig?.y,
     show: false,
     frame: false,
-    resizable: false,
+    resizable: true,
     transparent: true,
     alwaysOnTop: true,
     skipTaskbar: true,
@@ -47,7 +51,7 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Save position when window is moved
+  // Save only position when window is moved (size always resets to default)
   mainWindow.on('moved', () => {
     const bounds = mainWindow.getBounds();
     saveWindowConfig({ x: bounds.x, y: bounds.y });

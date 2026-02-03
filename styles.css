@@ -55,28 +55,48 @@ body {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4),
               0 8px 24px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  max-height: 500px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-}
-
-/* Draggable window header */
-.drag-handle {
   -webkit-app-region: drag;
-  height: 20px;
-  cursor: move;
 }
 
-.drag-handle + .view {
-  padding-top: 10px;
+/* Make interactive elements non-draggable */
+button,
+input,
+select,
+textarea,
+a,
+.icon-button,
+.model-indicator,
+.preset-btn,
+.toggle-switch,
+.output-section,
+.output-text {
+  -webkit-app-region: no-drag;
 }
 
 /* Views */
 .view {
-  padding: 20px;
+  padding: 16px 20px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.input-section {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.input-section textarea {
+  flex: 1;
+  min-height: 60px;
 }
 
 .hidden {
@@ -270,11 +290,6 @@ textarea {
 .icon-button:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
-}
-
-/* Input section */
-.input-section {
-  position: relative;
 }
 
 .clear-button {
