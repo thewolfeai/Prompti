@@ -217,12 +217,6 @@ function showWindow(trayBounds) {
 
   mainWindow.show();
   mainWindow.focus();
-
-  // Send clipboard content to renderer
-  const clipboardText = clipboard.readText();
-  if (clipboardText && clipboardText.length < 5000) {
-    mainWindow.webContents.send('clipboard-content', clipboardText);
-  }
 }
 
 // Register global shortcut
