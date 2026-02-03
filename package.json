@@ -1,0 +1,53 @@
+{
+  "name": "prompti",
+  "version": "1.0.0",
+  "description": "A menubar app that enhances your prompts using AI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
+  },
+  "author": "Drake Wolfe",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@google/generative-ai": "^0.21.0",
+    "groq-sdk": "^0.8.0",
+    "keytar": "^7.9.0",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.prompti.app",
+    "productName": "Prompti",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "providers.js",
+      "storage.js",
+      "index.html",
+      "styles.css",
+      "renderer.js",
+      "assets/**/*"
+    ]
+  }
+}
