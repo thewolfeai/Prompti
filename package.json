@@ -19,7 +19,7 @@
     "openai": "^4.0.0"
   },
   "devDependencies": {
-    "electron": "^28.3.3",
+    "electron": "^27.3.11",
     "electron-builder": "^25.0.0"
   },
   "build": {
