@@ -106,7 +106,7 @@ function createTray() {
     toggleWindow(bounds);
   });
 
-  // Right-click context menu
+  // Right-click context menu (macOS needs manual popup)
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Open Prompti',
@@ -123,7 +123,10 @@ function createTray() {
       }
     }
   ]);
-  tray.setContextMenu(contextMenu);
+
+  tray.on('right-click', () => {
+    tray.popUpContextMenu(contextMenu);
+  });
 }
 
 // Create a simple tray icon programmatically
