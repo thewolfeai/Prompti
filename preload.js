@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('prompti', {
   validateApiKey: (options) => ipcRenderer.invoke('validate-api-key', options),
   getOllamaModels: () => ipcRenderer.invoke('get-ollama-models'),
 
+  // System settings
+  setAutostart: (enabled) => ipcRenderer.invoke('set-autostart', enabled),
+
   // Listen for clipboard content on window show
   onClipboardContent: (callback) => {
     ipcRenderer.on('clipboard-content', (event, text) => callback(text));

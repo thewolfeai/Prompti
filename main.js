@@ -1,14 +1,37 @@
 const { app, BrowserWindow, Tray, globalShortcut, ipcMain, clipboard, nativeImage, screen, Menu, MenuItem } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let tray = null;
 let mainWindow = null;
 
+// Config file for window position
+const configPath = path.join(app.getPath('userData'), 'window-config.json');
+
+function loadWindowConfig() {
+  try {
+    if (fs.existsSync(configPath)) {
+      return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+  } catch (e) {}
+  return null;
+}
+
+function saveWindowConfig(config) {
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config));
+  } catch (e) {}
+}
+
 // Create the main window
 function createWindow() {
+  const savedConfig = loadWindowConfig();
+
   mainWindow = new BrowserWindow({
     width: 400,
     height: 500,
+    x: savedConfig?.x,
+    y: savedConfig?.y,
     show: false,
     frame: false,
     resizable: false,
@@ -23,6 +46,12 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
+
+  // Save position when window is moved
+  mainWindow.on('moved', () => {
+    const bounds = mainWindow.getBounds();
+    saveWindowConfig({ x: bounds.x, y: bounds.y });
+  });
 
   // Hide window when it loses focus
   mainWindow.on('blur', () => {
@@ -134,29 +163,35 @@ function toggleWindow(trayBounds) {
   }
 }
 
-// Show window positioned below tray icon
+// Show window positioned below tray icon (or at saved position)
 function showWindow(trayBounds) {
-  if (!trayBounds && tray) {
-    trayBounds = tray.getBounds();
+  const savedConfig = loadWindowConfig();
+
+  // Only auto-position if no saved position
+  if (!savedConfig) {
+    if (!trayBounds && tray) {
+      trayBounds = tray.getBounds();
+    }
+
+    const windowBounds = mainWindow.getBounds();
+
+    // Position window below tray icon, centered
+    let x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2));
+    let y = Math.round(trayBounds.y + trayBounds.height + 4);
+
+    // Make sure window stays on screen
+    const display = screen.getDisplayNearestPoint({ x, y });
+
+    if (x + windowBounds.width > display.bounds.x + display.bounds.width) {
+      x = display.bounds.x + display.bounds.width - windowBounds.width - 10;
+    }
+    if (x < display.bounds.x) {
+      x = display.bounds.x + 10;
+    }
+
+    mainWindow.setPosition(x, y, false);
   }
 
-  const windowBounds = mainWindow.getBounds();
-
-  // Position window below tray icon, centered
-  let x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2));
-  let y = Math.round(trayBounds.y + trayBounds.height + 4);
-
-  // Make sure window stays on screen
-  const display = screen.getDisplayNearestPoint({ x, y });
-
-  if (x + windowBounds.width > display.bounds.x + display.bounds.width) {
-    x = display.bounds.x + display.bounds.width - windowBounds.width - 10;
-  }
-  if (x < display.bounds.x) {
-    x = display.bounds.x + 10;
-  }
-
-  mainWindow.setPosition(x, y, false);
   mainWindow.show();
   mainWindow.focus();
 
@@ -257,9 +292,9 @@ ipcMain.handle('storage-delete', async (event, key) => {
 });
 
 // Provider IPC handlers (will be implemented in providers.js)
-ipcMain.handle('enhance-prompt', async (event, { prompt, provider, model, apiKey }) => {
+ipcMain.handle('enhance-prompt', async (event, { prompt, provider, model, apiKey, systemPrompt }) => {
   const providers = require('./providers');
-  return await providers.enhance(prompt, provider, model, apiKey);
+  return await providers.enhance(prompt, provider, model, apiKey, systemPrompt);
 });
 
 ipcMain.handle('validate-api-key', async (event, { provider, apiKey }) => {
@@ -270,4 +305,13 @@ ipcMain.handle('validate-api-key', async (event, { provider, apiKey }) => {
 ipcMain.handle('get-ollama-models', async () => {
   const providers = require('./providers');
   return await providers.getOllamaModels();
+});
+
+// Auto-start handler
+ipcMain.handle('set-autostart', (event, enabled) => {
+  app.setLoginItemSettings({
+    openAtLogin: enabled,
+    openAsHidden: true
+  });
+  return true;
 });

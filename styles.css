@@ -6,20 +6,34 @@
 }
 
 :root {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #242424;
-  --bg-tertiary: #2d2d2d;
-  --bg-hover: #333333;
+  /* Dark theme (default) */
+  --bg-primary: rgba(26, 26, 26, 0.85);
+  --bg-secondary: rgba(36, 36, 36, 0.8);
+  --bg-tertiary: rgba(45, 45, 45, 0.8);
+  --bg-hover: rgba(51, 51, 51, 0.9);
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
   --text-muted: #666666;
   --accent: #6366f1;
   --accent-hover: #5558e3;
-  --border: #3d3d3d;
+  --border: rgba(255, 255, 255, 0.1);
   --error: #ef4444;
   --success: #22c55e;
-  --radius: 12px;
-  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --glass-blur: 20px;
+}
+
+/* Light theme */
+:root.light {
+  --bg-primary: rgba(255, 255, 255, 0.75);
+  --bg-secondary: rgba(245, 245, 245, 0.8);
+  --bg-tertiary: rgba(235, 235, 235, 0.8);
+  --bg-hover: rgba(225, 225, 225, 0.9);
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border: rgba(0, 0, 0, 0.1);
 }
 
 body {
@@ -34,13 +48,27 @@ body {
 
 #app {
   background: var(--bg-primary);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: var(--radius);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-              0 0 0 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4),
+              0 8px 24px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   max-height: 500px;
   display: flex;
   flex-direction: column;
+}
+
+/* Draggable window header */
+.drag-handle {
+  -webkit-app-region: drag;
+  height: 20px;
+  cursor: move;
+}
+
+.drag-handle + .view {
+  padding-top: 10px;
 }
 
 /* Views */
@@ -133,13 +161,15 @@ textarea {
   width: 100%;
   padding: 10px 12px;
   background: var(--bg-secondary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
 select:focus,
@@ -223,6 +253,34 @@ textarea {
   position: relative;
 }
 
+.clear-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  opacity: 0.7;
+}
+
+.clear-button:hover {
+  background: var(--error);
+  color: white;
+  opacity: 1;
+}
+
+.clear-button.hidden {
+  display: none;
+}
+
 /* Output section */
 .output-section {
   background: var(--bg-secondary);
@@ -302,11 +360,14 @@ textarea {
   right: 0;
   bottom: 0;
   background: var(--bg-primary);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   z-index: 100;
+  overflow-y: auto;
 }
 
 .settings-header {
@@ -413,4 +474,135 @@ textarea {
 
 .view {
   animation: fade-in 0.2s ease-out;
+}
+
+/* Toggle switch */
+.toggle-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.toggle-group label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background: var(--text-secondary);
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+  background: white;
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.checkbox-group label {
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* Custom prompt section */
+.custom-prompt-section {
+  margin-top: 8px;
+}
+
+.custom-prompt-section label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.custom-prompt-section textarea {
+  min-height: 80px;
+  font-size: 12px;
+}
+
+.prompt-presets {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-btn:hover,
+.preset-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* Settings divider */
+.settings-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
 }

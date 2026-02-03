@@ -56,19 +56,22 @@ Enhanced: "Write a professional, apologetic email to my manager explaining I'll 
 /**
  * Enhance a prompt using the specified provider
  */
-async function enhance(prompt, provider, model, apiKey) {
+async function enhance(prompt, provider, model, apiKey, systemPrompt) {
+  // Use custom system prompt if provided, otherwise use default
+  const effectiveSystemPrompt = systemPrompt || ENHANCEMENT_SYSTEM_PROMPT;
+
   try {
     switch (provider) {
       case 'anthropic':
-        return await enhanceWithAnthropic(prompt, model, apiKey);
+        return await enhanceWithAnthropic(prompt, model, apiKey, effectiveSystemPrompt);
       case 'openai':
-        return await enhanceWithOpenAI(prompt, model, apiKey);
+        return await enhanceWithOpenAI(prompt, model, apiKey, effectiveSystemPrompt);
       case 'google':
-        return await enhanceWithGoogle(prompt, model, apiKey);
+        return await enhanceWithGoogle(prompt, model, apiKey, effectiveSystemPrompt);
       case 'groq':
-        return await enhanceWithGroq(prompt, model, apiKey);
+        return await enhanceWithGroq(prompt, model, apiKey, effectiveSystemPrompt);
       case 'ollama':
-        return await enhanceWithOllama(prompt, model);
+        return await enhanceWithOllama(prompt, model, effectiveSystemPrompt);
       default:
         throw new Error(`Unknown provider: ${provider}`);
     }
@@ -103,14 +106,14 @@ async function validateKey(provider, apiKey) {
 }
 
 // Anthropic (Claude)
-async function enhanceWithAnthropic(prompt, model, apiKey) {
+async function enhanceWithAnthropic(prompt, model, apiKey, systemPrompt) {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey });
 
   const response = await client.messages.create({
     model: model,
     max_tokens: 1024,
-    system: ENHANCEMENT_SYSTEM_PROMPT,
+    system: systemPrompt,
     messages: [{ role: 'user', content: prompt }]
   });
 
@@ -138,7 +141,7 @@ async function validateAnthropicKey(apiKey) {
 }
 
 // OpenAI (GPT)
-async function enhanceWithOpenAI(prompt, model, apiKey) {
+async function enhanceWithOpenAI(prompt, model, apiKey, systemPrompt) {
   const OpenAI = require('openai');
   const client = new OpenAI({ apiKey });
 
@@ -146,7 +149,7 @@ async function enhanceWithOpenAI(prompt, model, apiKey) {
     model: model,
     max_tokens: 1024,
     messages: [
-      { role: 'system', content: ENHANCEMENT_SYSTEM_PROMPT },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: prompt }
     ]
   });
@@ -174,13 +177,13 @@ async function validateOpenAIKey(apiKey) {
 }
 
 // Google (Gemini)
-async function enhanceWithGoogle(prompt, model, apiKey) {
+async function enhanceWithGoogle(prompt, model, apiKey, systemPrompt) {
   const { GoogleGenerativeAI } = require('@google/generative-ai');
   const genAI = new GoogleGenerativeAI(apiKey);
   const genModel = genAI.getGenerativeModel({ model: model });
 
   const result = await genModel.generateContent({
-    contents: [{ role: 'user', parts: [{ text: `${ENHANCEMENT_SYSTEM_PROMPT}\n\nUser prompt to enhance: ${prompt}` }] }]
+    contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nUser prompt to enhance: ${prompt}` }] }]
   });
 
   return result.response.text();
@@ -203,7 +206,7 @@ async function validateGoogleKey(apiKey) {
 }
 
 // Groq
-async function enhanceWithGroq(prompt, model, apiKey) {
+async function enhanceWithGroq(prompt, model, apiKey, systemPrompt) {
   const Groq = require('groq-sdk');
   const client = new Groq({ apiKey });
 
@@ -211,7 +214,7 @@ async function enhanceWithGroq(prompt, model, apiKey) {
     model: model,
     max_tokens: 1024,
     messages: [
-      { role: 'system', content: ENHANCEMENT_SYSTEM_PROMPT },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: prompt }
     ]
   });
@@ -239,13 +242,13 @@ async function validateGroqKey(apiKey) {
 }
 
 // Ollama (Local)
-async function enhanceWithOllama(prompt, model) {
+async function enhanceWithOllama(prompt, model, systemPrompt) {
   const response = await fetch('http://localhost:11434/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: model,
-      prompt: `${ENHANCEMENT_SYSTEM_PROMPT}\n\nUser prompt to enhance: ${prompt}`,
+      prompt: `${systemPrompt}\n\nUser prompt to enhance: ${prompt}`,
       stream: false
     })
   });

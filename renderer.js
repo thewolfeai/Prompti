@@ -45,13 +45,57 @@ const PROVIDER_NAMES = {
   ollama: 'Ollama (Local)'
 };
 
+// Preset system prompts
+const PRESET_PROMPTS = {
+  default: `You are a prompt enhancement assistant. Transform rough prompts into clear, effective prompts that get better AI results.
+
+Rules:
+1. Preserve the original intent exactly
+2. Add context and specificity where missing
+3. Structure clearly: context → task → format (if needed)
+4. Remove ambiguity
+5. Stay concise - don't over-elaborate
+6. Output ONLY the enhanced prompt, nothing else`,
+
+  formal: `You are a professional prompt enhancement assistant. Transform prompts into formal, business-appropriate language.
+
+Rules:
+1. Use professional, polished language
+2. Maintain formal tone throughout
+3. Structure with clear objectives and deliverables
+4. Remove casual expressions
+5. Output ONLY the enhanced prompt, nothing else`,
+
+  creative: `You are a creative prompt enhancement assistant. Transform prompts to encourage imaginative, unique responses.
+
+Rules:
+1. Add creative flair and vivid language
+2. Encourage exploration of unconventional ideas
+3. Include sensory details where appropriate
+4. Maintain the core intent while expanding possibilities
+5. Output ONLY the enhanced prompt, nothing else`,
+
+  technical: `You are a technical prompt enhancement assistant. Transform prompts for precise, technical responses.
+
+Rules:
+1. Use precise technical terminology
+2. Request specific formats (code blocks, diagrams, steps)
+3. Include relevant constraints and requirements
+4. Ask for edge cases and error handling where applicable
+5. Output ONLY the enhanced prompt, nothing else`
+};
+
 // State
 let state = {
   provider: null,
   model: null,
   apiKey: null,
   isLoading: false,
-  ollamaModels: []
+  ollamaModels: [],
+  theme: 'dark',
+  autostart: false,
+  promptPreset: 'default',
+  customPrompt: ''
 };
 
 // DOM Elements
@@ -75,6 +119,7 @@ const elements = {
   currentModel: document.getElementById('current-model'),
   settingsButton: document.getElementById('settings-button'),
   promptInput: document.getElementById('prompt-input'),
+  clearInputButton: document.getElementById('clear-input'),
   enhanceButton: document.getElementById('enhance-button'),
   outputSection: document.getElementById('output-section'),
   outputText: document.getElementById('output-text'),
@@ -90,11 +135,27 @@ const elements = {
   settingsApiKeyGroup: document.getElementById('settings-api-key-group'),
   settingsGetKeyLink: document.getElementById('settings-get-key-link'),
   settingsSave: document.getElementById('settings-save'),
-  settingsError: document.getElementById('settings-error')
+  settingsError: document.getElementById('settings-error'),
+
+  // New settings
+  themeToggle: document.getElementById('theme-toggle'),
+  autostartToggle: document.getElementById('autostart-toggle'),
+  presetButtons: document.querySelectorAll('.preset-btn'),
+  customPromptTextarea: document.getElementById('custom-prompt')
 };
 
 // Initialize
 async function init() {
+  // Load theme first (before any UI shows)
+  const savedTheme = await window.prompti.storage.get('theme');
+  state.theme = savedTheme || 'dark';
+  applyTheme(state.theme);
+
+  // Load other preferences
+  state.autostart = await window.prompti.storage.get('autostart') || false;
+  state.promptPreset = await window.prompti.storage.get('promptPreset') || 'default';
+  state.customPrompt = await window.prompti.storage.get('customPrompt') || '';
+
   // Check if onboarding completed
   const provider = await window.prompti.storage.get('provider');
 
@@ -146,6 +207,7 @@ function setupEventListeners() {
   elements.modelIndicator.addEventListener('click', showSettings);
   elements.enhanceButton.addEventListener('click', handleEnhance);
   elements.copyButton.addEventListener('click', handleCopy);
+  elements.clearInputButton.addEventListener('click', handleClearInput);
   elements.promptInput.addEventListener('input', updateEnhanceButton);
   elements.promptInput.addEventListener('keydown', handlePromptKeydown);
 
@@ -153,6 +215,20 @@ function setupEventListeners() {
   elements.settingsBack.addEventListener('click', hideSettings);
   elements.settingsProvider.addEventListener('change', handleSettingsProviderChange);
   elements.settingsSave.addEventListener('click', handleSettingsSave);
+
+  // Theme toggle
+  elements.themeToggle.addEventListener('change', handleThemeToggle);
+
+  // Auto-start toggle
+  elements.autostartToggle.addEventListener('change', handleAutostartToggle);
+
+  // Preset buttons
+  elements.presetButtons.forEach(btn => {
+    btn.addEventListener('click', handlePresetClick);
+  });
+
+  // Custom prompt textarea
+  elements.customPromptTextarea.addEventListener('input', handleCustomPromptInput);
 
   // Keyboard shortcuts
   document.addEventListener('keydown', handleGlobalKeydown);
@@ -265,7 +341,8 @@ async function handleEnhance() {
       prompt,
       provider: state.provider,
       model: state.model,
-      apiKey: state.apiKey
+      apiKey: state.apiKey,
+      systemPrompt: getCurrentSystemPrompt()
     });
 
     elements.outputText.textContent = enhanced;
@@ -300,6 +377,14 @@ function handleCopy() {
   }
 }
 
+function handleClearInput() {
+  elements.promptInput.value = '';
+  elements.outputSection.classList.add('hidden');
+  elements.mainError.textContent = '';
+  updateEnhanceButton();
+  elements.promptInput.focus();
+}
+
 function handlePromptKeydown(e) {
   // Enter to enhance (without shift)
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -327,9 +412,73 @@ function handleGlobalKeydown(e) {
   }
 }
 
+// Theme handling
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.classList.add('light');
+  } else {
+    document.documentElement.classList.remove('light');
+  }
+}
+
+async function handleThemeToggle(e) {
+  state.theme = e.target.checked ? 'light' : 'dark';
+  applyTheme(state.theme);
+  await window.prompti.storage.set('theme', state.theme);
+}
+
+// Auto-start handling
+async function handleAutostartToggle(e) {
+  state.autostart = e.target.checked;
+  await window.prompti.storage.set('autostart', state.autostart);
+  await window.prompti.setAutostart(state.autostart);
+}
+
+// Preset handling
+function handlePresetClick(e) {
+  const preset = e.target.dataset.preset;
+
+  // Update active button
+  elements.presetButtons.forEach(btn => btn.classList.remove('active'));
+  e.target.classList.add('active');
+
+  state.promptPreset = preset;
+
+  // Show/hide custom textarea
+  if (preset === 'custom') {
+    elements.customPromptTextarea.classList.remove('hidden');
+    elements.customPromptTextarea.value = state.customPrompt;
+  } else {
+    elements.customPromptTextarea.classList.add('hidden');
+  }
+
+  // Save preference (don't await, fire and forget)
+  window.prompti.storage.set('promptPreset', preset);
+}
+
+async function handleCustomPromptInput(e) {
+  state.customPrompt = e.target.value;
+  await window.prompti.storage.set('customPrompt', state.customPrompt);
+}
+
+// Get current system prompt based on preset
+function getCurrentSystemPrompt() {
+  if (state.promptPreset === 'custom' && state.customPrompt.trim()) {
+    return state.customPrompt;
+  }
+  return PRESET_PROMPTS[state.promptPreset] || PRESET_PROMPTS.default;
+}
+
 function updateEnhanceButton() {
   const hasPrompt = elements.promptInput.value.trim().length > 0;
   elements.enhanceButton.disabled = !hasPrompt || state.isLoading;
+
+  // Show/hide clear button
+  if (hasPrompt) {
+    elements.clearInputButton.classList.remove('hidden');
+  } else {
+    elements.clearInputButton.classList.add('hidden');
+  }
 
   const textEl = elements.enhanceButton.querySelector('.button-text');
   const loadingEl = elements.enhanceButton.querySelector('.button-loading');
@@ -361,6 +510,25 @@ function showSettings() {
 
   // Update API key link
   handleSettingsProviderChange();
+
+  // Set theme toggle state
+  elements.themeToggle.checked = state.theme === 'light';
+
+  // Set autostart toggle state
+  elements.autostartToggle.checked = state.autostart;
+
+  // Set preset buttons state
+  elements.presetButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.preset === state.promptPreset);
+  });
+
+  // Show/hide custom prompt textarea
+  if (state.promptPreset === 'custom') {
+    elements.customPromptTextarea.classList.remove('hidden');
+    elements.customPromptTextarea.value = state.customPrompt;
+  } else {
+    elements.customPromptTextarea.classList.add('hidden');
+  }
 
   elements.settingsPanel.classList.remove('hidden');
 }
