@@ -101,9 +101,29 @@ function createTray() {
 
   tray.setToolTip('Prompti - Click to enhance prompts');
 
+  // Left-click to toggle window
   tray.on('click', (event, bounds) => {
     toggleWindow(bounds);
   });
+
+  // Right-click context menu
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Open Prompti',
+      click: () => {
+        if (tray) showWindow(tray.getBounds());
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        app.isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+  tray.setContextMenu(contextMenu);
 }
 
 // Create a simple tray icon programmatically
