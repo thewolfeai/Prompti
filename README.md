@@ -22,34 +22,17 @@ Prompti is a menubar app that transforms rough prompts into clear, effective one
 
 ## Installation
 
-### macOS
+### macOS & Windows
 
-**Option 1: Download DMG**
-1. Download `Prompti.dmg` from [Releases](https://github.com/thewolfeai/Prompti/releases)
-2. Open the DMG and drag Prompti to Applications
-3. Launch Prompti from Applications
+Run this in your terminal:
 
-**Option 2: Build from source**
 ```bash
 git clone https://github.com/thewolfeai/Prompti.git
 cd Prompti
-npm install
-npm run build:mac
+npm install && npm start
 ```
 
-### Windows
-
-**Option 1: Download Installer**
-1. Download `Prompti-Setup.exe` from [Releases](https://github.com/thewolfeai/Prompti/releases)
-2. Run the installer
-
-**Option 2: Build from source**
-```bash
-git clone https://github.com/thewolfeai/Prompti.git
-cd Prompti
-npm install
-npm run build:win
-```
+That's it! Prompti will launch and appear in your menubar.
 
 ## First Launch
 
