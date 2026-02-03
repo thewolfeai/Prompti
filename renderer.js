@@ -85,6 +85,16 @@ Rules:
 5. Output ONLY the enhanced prompt, nothing else`
 };
 
+// Animated placeholder examples
+const PLACEHOLDER_EXAMPLES = [
+  "help me write a cover letter",
+  "explain quantum computing simply",
+  "write a thank you email to my team",
+  "summarize this article for me",
+  "help me brainstorm startup ideas",
+  "write a professional LinkedIn post"
+];
+
 // State
 let state = {
   provider: null,
@@ -96,6 +106,16 @@ let state = {
   autostart: false,
   promptPreset: 'default',
   customPrompt: ''
+};
+
+// Placeholder animation state
+let placeholderAnimation = {
+  intervalId: null,
+  timeoutId: null,
+  currentIndex: 0,
+  currentChar: 0,
+  isDeleting: false,
+  isActive: false
 };
 
 // DOM Elements
@@ -210,6 +230,14 @@ function setupEventListeners() {
   elements.clearInputButton.addEventListener('click', handleClearInput);
   elements.promptInput.addEventListener('input', updateEnhanceButton);
   elements.promptInput.addEventListener('keydown', handlePromptKeydown);
+
+  // Placeholder animation events
+  elements.promptInput.addEventListener('focus', stopPlaceholderAnimation);
+  elements.promptInput.addEventListener('blur', () => {
+    if (!elements.promptInput.value) {
+      startPlaceholderAnimation();
+    }
+  });
 
   // Settings
   elements.settingsBack.addEventListener('click', hideSettings);
@@ -603,6 +631,12 @@ function showMainView() {
   elements.onboardingView.classList.add('hidden');
   elements.mainView.classList.remove('hidden');
   updateMainView();
+
+  // Start placeholder animation if input is empty (will stop on focus)
+  if (!elements.promptInput.value) {
+    startPlaceholderAnimation();
+  }
+
   elements.promptInput.focus();
 }
 
@@ -618,6 +652,66 @@ function showToast() {
   setTimeout(() => {
     elements.toast.classList.add('hidden');
   }, 2000);
+}
+
+// Placeholder animation functions
+function startPlaceholderAnimation() {
+  if (placeholderAnimation.isActive) return;
+  if (elements.promptInput.value) return; // Don't animate if there's content
+
+  placeholderAnimation.isActive = true;
+  placeholderAnimation.currentIndex = 0;
+  placeholderAnimation.currentChar = 0;
+  placeholderAnimation.isDeleting = false;
+
+  animatePlaceholder();
+}
+
+function stopPlaceholderAnimation() {
+  placeholderAnimation.isActive = false;
+  if (placeholderAnimation.timeoutId) {
+    clearTimeout(placeholderAnimation.timeoutId);
+    placeholderAnimation.timeoutId = null;
+  }
+  // Reset placeholder to default
+  elements.promptInput.placeholder = 'Type or paste your prompt here...';
+}
+
+function animatePlaceholder() {
+  if (!placeholderAnimation.isActive) return;
+
+  const currentExample = PLACEHOLDER_EXAMPLES[placeholderAnimation.currentIndex];
+
+  if (!placeholderAnimation.isDeleting) {
+    // Typing
+    placeholderAnimation.currentChar++;
+    elements.promptInput.placeholder = currentExample.substring(0, placeholderAnimation.currentChar);
+
+    if (placeholderAnimation.currentChar === currentExample.length) {
+      // Done typing, pause then start deleting
+      placeholderAnimation.timeoutId = setTimeout(() => {
+        placeholderAnimation.isDeleting = true;
+        animatePlaceholder();
+      }, 2000); // Pause for 2 seconds
+    } else {
+      // Continue typing
+      placeholderAnimation.timeoutId = setTimeout(animatePlaceholder, 80);
+    }
+  } else {
+    // Deleting
+    placeholderAnimation.currentChar--;
+    elements.promptInput.placeholder = currentExample.substring(0, placeholderAnimation.currentChar);
+
+    if (placeholderAnimation.currentChar === 0) {
+      // Done deleting, move to next example
+      placeholderAnimation.isDeleting = false;
+      placeholderAnimation.currentIndex = (placeholderAnimation.currentIndex + 1) % PLACEHOLDER_EXAMPLES.length;
+      placeholderAnimation.timeoutId = setTimeout(animatePlaceholder, 500);
+    } else {
+      // Continue deleting
+      placeholderAnimation.timeoutId = setTimeout(animatePlaceholder, 40);
+    }
+  }
 }
 
 // Start
