@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, globalShortcut, ipcMain, clipboard, nativeImage, screen, Menu } = require('electron');
+const { app, BrowserWindow, Tray, globalShortcut, ipcMain, clipboard, nativeImage, screen, Menu, MenuItem } = require('electron');
 const path = require('path');
 
 let tray = null;
@@ -36,6 +36,26 @@ function createWindow() {
     if (!app.isQuitting) {
       event.preventDefault();
       mainWindow.hide();
+    }
+  });
+
+  // Right-click context menu
+  mainWindow.webContents.on('context-menu', (event, params) => {
+    const menu = new Menu();
+
+    if (params.isEditable) {
+      menu.append(new MenuItem({ role: 'undo' }));
+      menu.append(new MenuItem({ role: 'redo' }));
+      menu.append(new MenuItem({ type: 'separator' }));
+      menu.append(new MenuItem({ role: 'cut' }));
+      menu.append(new MenuItem({ role: 'copy' }));
+      menu.append(new MenuItem({ role: 'paste' }));
+      menu.append(new MenuItem({ type: 'separator' }));
+      menu.append(new MenuItem({ role: 'selectAll' }));
+      menu.popup();
+    } else if (params.selectionText) {
+      menu.append(new MenuItem({ role: 'copy' }));
+      menu.popup();
     }
   });
 }
