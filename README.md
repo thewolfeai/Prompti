@@ -42,8 +42,7 @@ Prompti will launch. Look in the **top-right corner** of your screen (menubar) f
 **To run in the background** (so you can close the terminal):
 
 ```bash
-cd ~/Prompti
-nohup npm start > /dev/null 2>&1 &
+cd ~/Prompti && (npm start &) && disown
 ```
 
 ## First Launch
