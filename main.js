@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, globalShortcut, ipcMain, clipboard, nativeImage, screen } = require('electron');
+const { app, BrowserWindow, Tray, globalShortcut, ipcMain, clipboard, nativeImage, screen, Menu } = require('electron');
 const path = require('path');
 
 let tray = null;
@@ -162,8 +162,29 @@ function registerShortcuts() {
   }
 }
 
+// Create application menu (required for copy/paste to work on macOS)
+function createMenu() {
+  const template = [
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 // App ready
 app.whenReady().then(() => {
+  createMenu();
   createWindow();
   createTray();
   registerShortcuts();
