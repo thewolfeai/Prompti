@@ -34,9 +34,8 @@ Prompti is a menubar app that transforms rough prompts into clear, effective one
 Run this in your terminal:
 
 ```bash
-git clone https://github.com/thewolfeai/Prompti.git
-cd Prompti
-npm install && npm start
+cd ~ && git clone https://github.com/thewolfeai/Prompti.git
+cd ~/Prompti && npm install && npm start
 ```
 
 Prompti will launch. Look in the **top-right corner** of your screen (menubar) for an **asterisk ✱ icon** — click it to open Prompti.
@@ -52,7 +51,7 @@ cd ~/Prompti && (npm start &) && disown
 Run this command to restart it:
 
 ```bash
-pkill -f Electron; pkill -f Prompti; cd ~/Desktop/Prompti && git pull && npm install && (npm start &) && disown
+pkill -f Electron; pkill -f Prompti; cd ~/Prompti && git pull && npm install && (npm start &) && disown
 ```
 
 **Pro tip:** Go to Settings (gear icon) and enable **"Start Prompti on login"** so it automatically runs whenever you restart your Mac!
@@ -118,13 +117,9 @@ npm install
 
 # Run in development
 npm start
-
-# Build for macOS
-npm run build:mac
-
-# Build for Windows
-npm run build:win
 ```
+
+> **Note:** Build commands (`npm run build:mac`, `npm run build:win`) require app icons in the `assets/` folder. For now, run directly with `npm start`.
 
 ## How It Works
 
@@ -134,16 +129,16 @@ Prompti uses a carefully crafted system prompt to transform your rough prompts:
 Transform rough prompts into clear, effective prompts.
 
 Rules:
-1. Preserve the original intent exactly
-2. Add context and specificity where missing
-3. Structure clearly: context → task → format
-4. Remove ambiguity
-5. Stay concise - don't over-elaborate
+1. Preserve the original intent exactly - don't add requirements the user didn't mention
+2. Clarify what the user wants, don't invent specifics (like sizes, colors, numbers)
+3. Structure clearly: context → task → desired outcome
+4. Remove ambiguity while staying true to what was asked
+5. Keep it concise - enhance, don't over-elaborate
 ```
 
 **Example:**
 - **Input:** "help me write an email to my boss about being late"
-- **Output:** "Write a professional, apologetic email to my manager explaining I'll be 15-30 minutes late today. Keep it respectful and brief. Offer to make up the time or handle urgent matters remotely."
+- **Output:** "Write a professional, apologetic email to my manager explaining I'll be late today. Keep it brief and respectful, and offer to address any urgent matters remotely."
 
 ## Security
 
