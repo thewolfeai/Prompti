@@ -31,7 +31,7 @@ function createWindow() {
     width: 380,
     height: 280,
     minWidth: 320,
-    minHeight: 250,
+    minHeight: 260,
     maxWidth: 600,
     maxHeight: 800,
     x: savedConfig?.x,
